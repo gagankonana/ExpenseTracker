@@ -27,4 +27,51 @@ classes:
 
 */
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <iostream>
+
+enum ExpenseCategory {
+    SHOPPING,
+    BILLS,
+    TRANSPORT
+};
+
+class Expense {
+public:
+    Expense(int _id, const ExpenseCategory _category, const float& _price) : 
+        id{_id}, price{_price}, category(_category) {}
+    void set_price(const float& _price) { price = _price; }
+    void set_category(const ExpenseCategory _category) { category = _category; }
+    [[nodiscard]] const float get_price() noexcept { return price; }
+    [[nodiscard]] const int get_id() noexcept { return id; }
+    [[nodiscard]] const ExpenseCategory get_category() noexcept { return category; }
+    friend std::ostream& operator<<(std::ostream& out, const std::shared_ptr<Expense> expense);
+ private:
+    int id;
+    ExpenseCategory category;
+    float price;
+};
+
+std::ostream& operator<< (std::ostream& out, const std::shared_ptr<Expense> expense) {
+    out << expense->id << ": " << expense->price << " (" << expense->category << ")" << std::endl;
+    return out; 
+}
+
+class System {
+public:
+    System() {}
+    void add_expense(const std::string& username, ExpenseCategory _category, const float& _price) {
+        std::shared_ptr<Expense> expense = std::make_shared<Expense>(id++, _category, _price);
+        expenses[username].push_back(expense);
+    }
+    [[nodiscard]] const std::vector<std::shared_ptr<Expense>> get_expenses(const std::string& username) noexcept { return expenses[username]; }
+    [[nodiscard]] const std::shared_ptr<Expense> get_expense_top(std::string username) { return expenses[username].back(); }
+private:
+    static inline int id = 0;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<Expense>>> expenses;
+};
+
 #endif
